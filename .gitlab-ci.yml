@@ -1,0 +1,33 @@
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  DOCKER_COMPOSE_VERSION: "1.29.2"
+stages:
+  - build
+  - deploy
+  - test
+  - sonarqube-check
+
+before_script:
+  - docker-compose version
+services:
+  - docker:dind
+build:
+  stage: build
+  script:
+    - ./gradlew assemble
+deploy:
+  stage: deploy
+  script:
+    - docker-compose -f D:\Kuliah\Fontys\Semester3\Java\Project\docker-compose.yml up -d
+    - sleep 5
+test:
+  stage: test
+  script:
+    - ./gradlew test
+sonarqube:
+  stage: sonarqube-check
+  script:
+    - ./gradlew jacocoTestReport sonarqube
+  allow_failure: true
+  only:
+    - main
